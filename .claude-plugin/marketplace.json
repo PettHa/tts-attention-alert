@@ -12,7 +12,7 @@
         "url": "https://github.com/PettHa/tts-attention-alert.git"
       },
       "description": "TTS + animated edge-pulse alerts that demand your attention when Claude pauses, asks a question, requests Bash permission, or finishes a response. Auto-ducks media around speech. Windows only.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "PettHa"
       },

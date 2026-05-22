@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-22
+
+### Added
+
+- **Granular mute via slash-commands.** Three new commands ship with the plugin: `/mute-tts [scope]`, `/unmute-tts [scope]`, `/mute-tts-status`. Scopes are `all` (default — silences every hook), `voice` (TTS off, edge-pulse stays), and `visual` (edge-pulse off, TTS stays). The commands edit the `env` block in `~/.claude/settings.json`; a `Developer: Reload Window` propagates the new env vars to the hook subprocesses.
+- **`CLAUDE_NOTIFY_PULSE_DISABLED=1`** env var — suppresses the gold edge-pulse on Notification + Bash permission events while still letting TTS speak. Shared between `notification-alert.js` and `bash-permission-alert.js`, mirroring how those hooks already share `CLAUDE_NOTIFY_TTS_DISABLED`.
+- **`CLAUDE_STOP_PULSE_DISABLED=1`** env var — same idea for the blue edge-pulse on the Stop hook.
+
+### Why
+
+Petter wanted "TTS but no flashing border" and "border but no voice" as independent toggles for meeting / recording scenarios. Previous releases only offered "everything off" (`*_DISABLED`) or "TTS off, pulse still fires" (`*_TTS_DISABLED`) — the inverse (pulse off, TTS on) did not exist. The new `*_PULSE_DISABLED` vars fill that gap, and the slash-commands give a one-command UX so users don't have to hand-edit settings.json.
+
 ## [0.3.0] - 2026-05-14
 
 ### Added
@@ -81,7 +93,9 @@ Claude Code's `Notification` event does not fire for the in-window "Allow this b
 | `CLAUDE_STOP_TTS_TEXT="..."` | Override the Stop spoken phrase |
 | `CLAUDE_NOTIFY_DUCK_DISABLED=1` | Skip pausing Spotify/YouTube/etc around TTS |
 
-[Unreleased]: https://github.com/PettHa/tts-attention-alert/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/PettHa/tts-attention-alert/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.4.0
+[0.3.0]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.3.0
 [0.2.1]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.2.1
 [0.2.0]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.2.0
 [0.1.1]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.1.1

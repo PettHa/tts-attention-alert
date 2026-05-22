@@ -19,6 +19,7 @@
  * Disable everything: CLAUDE_NOTIFY_DISABLED=1 (shared with notification-alert)
  *                     CLAUDE_BASH_ALERT_DISABLED=1 (this hook only)
  * Disable just TTS:   CLAUDE_NOTIFY_TTS_DISABLED=1
+ * Disable just pulse: CLAUDE_NOTIFY_PULSE_DISABLED=1 (shared with notification-alert)
  * Override phrase:    CLAUDE_NOTIFY_TTS_TEXT="..."
  *
  * Trigger: PermissionRequest, matcher Bash
@@ -48,6 +49,10 @@ function isDisabled() {
   if (String(process.env.CLAUDE_NOTIFY_DISABLED || '').toLowerCase() === '1') return true;
   if (String(process.env.CLAUDE_BASH_ALERT_DISABLED || '').toLowerCase() === '1') return true;
   return false;
+}
+
+function isPulseDisabled() {
+  return String(process.env.CLAUDE_NOTIFY_PULSE_DISABLED || '').toLowerCase() === '1';
 }
 
 function shouldThrottle() {
@@ -144,7 +149,7 @@ function run(rawInput) {
 
   try {
     notifyWindows(command);
-    triggerEdgePulse('Gold');
+    if (!isPulseDisabled()) triggerEdgePulse('Gold');
   } catch (err) {
     return { exitCode: 0, stderr: `[bash-permission-alert] failed: ${err.message}` };
   }
@@ -152,7 +157,7 @@ function run(rawInput) {
   return { exitCode: 0 };
 }
 
-module.exports = { run, pickPhrase };
+module.exports = { run, pickPhrase, isPulseDisabled };
 
 if (require.main === module) {
   let raw = '';
