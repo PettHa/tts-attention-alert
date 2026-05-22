@@ -1,5 +1,7 @@
 'use strict';
 
+const { readClaudeEnv } = require('./load-settings');
+
 /**
  * Build a PowerShell snippet that pauses any active media-transport
  * session (Spotify, YouTube, VLC, podcast apps — anything that
@@ -12,7 +14,7 @@
  * env: CLAUDE_NOTIFY_DUCK_DISABLED=1 skips ducking entirely.
  */
 function buildDuckWrappedAction(innerActionLine) {
-  if (String(process.env.CLAUDE_NOTIFY_DUCK_DISABLED || '').toLowerCase() === '1') {
+  if (String(readClaudeEnv('CLAUDE_NOTIFY_DUCK_DISABLED') || '').toLowerCase() === '1') {
     return innerActionLine;
   }
   return [

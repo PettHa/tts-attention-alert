@@ -26,7 +26,5 @@ If the file does not exist or is unreadable, create a minimal one: `{ "env": { .
 
 Tell the user (Norwegian or English depending on their language):
 - Which scope you muted (`all` / `voice` / `visual`)
-- That they need to reload the VSCode window for the change to take effect: `Ctrl+Shift+P` → `Developer: Reload Window`
+- That the mute takes effect on the next hook fire (next prompt completion, next permission request, etc.) — no window reload required, even for other already-open Claude Code sessions. The hooks re-read `~/.claude/settings.json` on every event.
 - That `/unmute-tts` restores it, `/mute-tts-status` shows current state
-
-Do NOT actually trigger a reload yourself.

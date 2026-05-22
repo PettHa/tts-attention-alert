@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-22
+
+### Changed
+
+- **Slash-command mute now takes effect immediately across every open Claude Code session, with no `Developer: Reload Window` required.** Hooks re-read `~/.claude/settings.json` on every fire, so `/mute-tts visual` (or any toggle) propagates to every other already-running session on its next event. Cold-start sessions still inherit the persistent env block exactly as before.
+- New helper `hooks/lib/load-settings.js` resolves CLAUDE_* env vars via settings.json first, falling back to `process.env`. All 17 `process.env.CLAUDE_*` reads in the plugin (across `notification-alert.js`, `stop-notify.js`, `bash-permission-alert.js`, `lib/audio-duck.js`, `lib/play-wav.js`) now route through it. Shell-set env vars (`$PROFILE`, `.envrc`) keep working as fallback for dev.
+
+### Why
+
+In v0.4.0 the `/mute-tts` command edited `~/.claude/settings.json` but `process.env` was cached by Claude Code at startup, so already-open windows didn't see the new state until each was reloaded individually. Reading the file at fire-time fixes the cross-window UX without introducing a new state file. File reads are cached for the hook process lifetime (one read per fire — hooks live milliseconds), so the perf hit is negligible.
+
+### Tests
+
+- New `hooks/lib/load-settings.test.js` — 9 assertions covering settings.json-wins / process.env-fallback / missing-file / malformed-JSON / empty-string / cache / no-env-block.
+- `hooks/pulse-disabled.test.js` extended with 4 live-mute assertions confirming settings.json overrides process.env at fire-time.
+
 ## [0.4.0] - 2026-05-22
 
 ### Added
@@ -93,7 +109,8 @@ Claude Code's `Notification` event does not fire for the in-window "Allow this b
 | `CLAUDE_STOP_TTS_TEXT="..."` | Override the Stop spoken phrase |
 | `CLAUDE_NOTIFY_DUCK_DISABLED=1` | Skip pausing Spotify/YouTube/etc around TTS |
 
-[Unreleased]: https://github.com/PettHa/tts-attention-alert/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/PettHa/tts-attention-alert/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.5.0
 [0.4.0]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.4.0
 [0.3.0]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.3.0
 [0.2.1]: https://github.com/PettHa/tts-attention-alert/releases/tag/v0.2.1

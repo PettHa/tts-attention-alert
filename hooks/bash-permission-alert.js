@@ -30,6 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { readClaudeEnv } = require('./lib/load-settings');
 
 const MAX_STDIN = 1024 * 1024;
 const THROTTLE_MS = 5000;
@@ -46,13 +47,13 @@ const { buildDuckWrappedAction } = require('./lib/audio-duck');
 const { buildPlayWavAction } = require('./lib/play-wav');
 
 function isDisabled() {
-  if (String(process.env.CLAUDE_NOTIFY_DISABLED || '').toLowerCase() === '1') return true;
-  if (String(process.env.CLAUDE_BASH_ALERT_DISABLED || '').toLowerCase() === '1') return true;
+  if (String(readClaudeEnv('CLAUDE_NOTIFY_DISABLED') || '').toLowerCase() === '1') return true;
+  if (String(readClaudeEnv('CLAUDE_BASH_ALERT_DISABLED') || '').toLowerCase() === '1') return true;
   return false;
 }
 
 function isPulseDisabled() {
-  return String(process.env.CLAUDE_NOTIFY_PULSE_DISABLED || '').toLowerCase() === '1';
+  return String(readClaudeEnv('CLAUDE_NOTIFY_PULSE_DISABLED') || '').toLowerCase() === '1';
 }
 
 function shouldThrottle() {
@@ -80,13 +81,14 @@ function pickPhrase(command) {
 }
 
 function buildPowerShellScript(command) {
-  if (String(process.env.CLAUDE_NOTIFY_TTS_DISABLED || '').toLowerCase() === '1') return null;
-  const ttsRaw = process.env.CLAUDE_NOTIFY_TTS_TEXT || pickPhrase(command);
+  if (String(readClaudeEnv('CLAUDE_NOTIFY_TTS_DISABLED') || '').toLowerCase() === '1') return null;
+  const ttsOverride = readClaudeEnv('CLAUDE_NOTIFY_TTS_TEXT');
+  const ttsRaw = ttsOverride || pickPhrase(command);
   const ttsText = escapeSingleQuotes(ttsRaw.slice(0, 140));
   // Prefer pre-baked Supertonic WAV for known verbs; fall back to bare
   // "Bash permission needed" WAV for unknown verbs (via slug fallback in
   // play-wav.js), or live SAPI for the env-var override.
-  const wavAction = process.env.CLAUDE_NOTIFY_TTS_TEXT
+  const wavAction = ttsOverride
     ? null
     : buildPlayWavAction(ttsRaw) || buildPlayWavAction('Bash permission needed');
   const speakAction = wavAction
