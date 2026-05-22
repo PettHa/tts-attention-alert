@@ -28,6 +28,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { readClaudeEnv } = require('./lib/load-settings');
 
 const MAX_STDIN = 1024 * 1024;
 const THROTTLE_MS = 10000;
@@ -43,11 +44,11 @@ const LOG_FILE = path.join(STATE_DIR, 'notifications.log');
 let raw = '';
 
 function isDisabled() {
-  return String(process.env.CLAUDE_NOTIFY_DISABLED || '').toLowerCase() === '1';
+  return String(readClaudeEnv('CLAUDE_NOTIFY_DISABLED') || '').toLowerCase() === '1';
 }
 
 function isPulseDisabled() {
-  return String(process.env.CLAUDE_NOTIFY_PULSE_DISABLED || '').toLowerCase() === '1';
+  return String(readClaudeEnv('CLAUDE_NOTIFY_PULSE_DISABLED') || '').toLowerCase() === '1';
 }
 
 function shouldThrottle() {
@@ -90,17 +91,18 @@ function pickPhrase(message) {
 }
 
 function buildPowerShellScript(message) {
-  const ttsDisabled = String(process.env.CLAUDE_NOTIFY_TTS_DISABLED || '').toLowerCase() === '1';
+  const ttsDisabled = String(readClaudeEnv('CLAUDE_NOTIFY_TTS_DISABLED') || '').toLowerCase() === '1';
   if (ttsDisabled) return null;
   // Keyword-map the message to a short action phrase so urgent prompts
   // are instantly recognizable by ear. Falls back to speaking the full
   // message if no keyword matches. CLAUDE_NOTIFY_TTS_TEXT overrides
   // everything.
-  const ttsRaw = process.env.CLAUDE_NOTIFY_TTS_TEXT || pickPhrase(message);
+  const ttsOverride = readClaudeEnv('CLAUDE_NOTIFY_TTS_TEXT');
+  const ttsRaw = ttsOverride || pickPhrase(message);
   const ttsText = escapeSingleQuotes(ttsRaw.slice(0, 140));
   // Prefer pre-baked Supertonic WAV; fall back to live SAPI synthesis
   // for the env-var override path and any phrase we did not bake.
-  const wavAction = process.env.CLAUDE_NOTIFY_TTS_TEXT ? null : buildPlayWavAction(ttsRaw);
+  const wavAction = ttsOverride ? null : buildPlayWavAction(ttsRaw);
   const speakAction = wavAction
     || `Add-Type -AssemblyName System.Speech | Out-Null; $tts = New-Object System.Speech.Synthesis.SpeechSynthesizer; $tts.Speak('${ttsText}'); $tts.Dispose()`;
   return buildDuckWrappedAction(speakAction);

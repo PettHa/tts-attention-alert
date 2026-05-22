@@ -22,6 +22,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { readClaudeEnv } = require('./lib/load-settings');
 
 const MAX_STDIN = 1024 * 1024;
 const THROTTLE_MS = 30000;
@@ -37,11 +38,11 @@ const LOG_FILE = path.join(STATE_DIR, 'notifications.log');
 let raw = '';
 
 function isDisabled() {
-  return String(process.env.CLAUDE_STOP_NOTIFY_DISABLED || '').toLowerCase() === '1';
+  return String(readClaudeEnv('CLAUDE_STOP_NOTIFY_DISABLED') || '').toLowerCase() === '1';
 }
 
 function isPulseDisabled() {
-  return String(process.env.CLAUDE_STOP_PULSE_DISABLED || '').toLowerCase() === '1';
+  return String(readClaudeEnv('CLAUDE_STOP_PULSE_DISABLED') || '').toLowerCase() === '1';
 }
 
 function shouldThrottle() {
@@ -62,13 +63,14 @@ const { buildDuckWrappedAction } = require('./lib/audio-duck');
 const { buildPlayWavAction } = require('./lib/play-wav');
 
 function buildPowerShellScript() {
-  const ttsDisabled = String(process.env.CLAUDE_STOP_TTS_DISABLED || '').toLowerCase() === '1';
+  const ttsDisabled = String(readClaudeEnv('CLAUDE_STOP_TTS_DISABLED') || '').toLowerCase() === '1';
   if (ttsDisabled) return null;
-  const ttsRaw = process.env.CLAUDE_STOP_TTS_TEXT || 'Claude is done';
+  const ttsOverride = readClaudeEnv('CLAUDE_STOP_TTS_TEXT');
+  const ttsRaw = ttsOverride || 'Claude is done';
   const ttsText = ttsRaw.replace(/'/g, "''").slice(0, 140);
   // Prefer pre-baked Supertonic WAV; fall back to live SAPI synthesis for
   // the env-var override path and any unbaked phrase.
-  const wavAction = process.env.CLAUDE_STOP_TTS_TEXT ? null : buildPlayWavAction(ttsRaw);
+  const wavAction = ttsOverride ? null : buildPlayWavAction(ttsRaw);
   const speakAction = wavAction
     || `Add-Type -AssemblyName System.Speech | Out-Null; $tts = New-Object System.Speech.Synthesis.SpeechSynthesizer; $tts.Speak('${ttsText}'); $tts.Dispose()`;
   return buildDuckWrappedAction(speakAction);

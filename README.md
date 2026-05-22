@@ -106,7 +106,7 @@ Three slash-commands ship with the plugin so you can toggle mute scopes without 
 
 | Command | What it does |
 | :--- | :--- |
-| `/mute-tts [all\|voice\|visual]` | Sets the corresponding env keys to `"1"` in `~/.claude/settings.json` (defaults to `all`). Requires `Developer: Reload Window` to take effect. |
+| `/mute-tts [all\|voice\|visual]` | Sets the corresponding env keys to `"1"` in `~/.claude/settings.json` (defaults to `all`). |
 | `/unmute-tts [all\|voice\|visual]` | Removes the corresponding env keys. `all` clears every TTS-related key. |
 | `/mute-tts-status` | Reports which mute scopes are currently active by inspecting `~/.claude/settings.json`. |
 
@@ -115,6 +115,10 @@ Scope semantics:
 - **`all`** — flips `CLAUDE_NOTIFY_DISABLED`, `CLAUDE_STOP_NOTIFY_DISABLED`, `CLAUDE_BASH_ALERT_DISABLED`. Total silence.
 - **`voice`** — flips `CLAUDE_NOTIFY_TTS_DISABLED`, `CLAUDE_STOP_TTS_DISABLED`. Edge-pulse still fires; media-duck does not (it's tied to TTS).
 - **`visual`** — flips `CLAUDE_NOTIFY_PULSE_DISABLED`, `CLAUDE_STOP_PULSE_DISABLED`. TTS still fires.
+
+### Live config (v0.5.0+) — no reload required
+
+Slash-command edits take effect on the **next hook fire** in every open Claude Code session — no `Developer: Reload Window`, no restart, no per-window setup. Hooks read `~/.claude/settings.json` on every event, with `process.env` as a fallback. Shell-set env vars (PowerShell `$PROFILE`, `.envrc`, etc.) still work for dev — `settings.json` only overrides them when explicitly set.
 
 ## Bash permission alert (v0.2.0+)
 

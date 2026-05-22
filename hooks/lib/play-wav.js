@@ -15,6 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { readClaudeEnv } = require('./load-settings');
 
 const AUDIO_DIR = path.resolve(__dirname, '..', '..', 'audio');
 
@@ -40,7 +41,7 @@ const BAKED_BASH_VERBS = new Set([
 ]);
 
 function isDisabled() {
-  return String(process.env.CLAUDE_NOTIFY_WAV_DISABLED || '').toLowerCase() === '1';
+  return String(readClaudeEnv('CLAUDE_NOTIFY_WAV_DISABLED') || '').toLowerCase() === '1';
 }
 
 function slugForPhrase(text) {

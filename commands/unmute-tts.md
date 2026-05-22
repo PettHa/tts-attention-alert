@@ -26,7 +26,5 @@ Otherwise, delete each key from Step 1 from the `env` object (do not touch other
 
 Tell the user:
 - Which scope you unmuted
-- That they need to reload the VSCode window for the change to take effect: `Ctrl+Shift+P` → `Developer: Reload Window`
+- That the change takes effect on the next hook fire — no reload required, even for other open Claude Code sessions
 - That `/mute-tts-status` shows the current state if they want to verify
-
-Do NOT actually trigger a reload yourself.
