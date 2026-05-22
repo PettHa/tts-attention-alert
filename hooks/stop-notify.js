@@ -11,6 +11,7 @@
  *
  * Disable everything: CLAUDE_STOP_NOTIFY_DISABLED=1
  * Disable just TTS:   CLAUDE_STOP_TTS_DISABLED=1
+ * Disable just pulse: CLAUDE_STOP_PULSE_DISABLED=1
  * Custom TTS phrase:  CLAUDE_STOP_TTS_TEXT="Whatever you want"
  *
  * Trigger: Stop
@@ -37,6 +38,10 @@ let raw = '';
 
 function isDisabled() {
   return String(process.env.CLAUDE_STOP_NOTIFY_DISABLED || '').toLowerCase() === '1';
+}
+
+function isPulseDisabled() {
+  return String(process.env.CLAUDE_STOP_PULSE_DISABLED || '').toLowerCase() === '1';
 }
 
 function shouldThrottle() {
@@ -133,7 +138,7 @@ function run(rawInput) {
 
   try {
     notifyWindows();
-    triggerEdgePulse('DodgerBlue');
+    if (!isPulseDisabled()) triggerEdgePulse('DodgerBlue');
   } catch (err) {
     return { exitCode: 0, stderr: `[stop-notify] failed: ${err.message}` };
   }
@@ -141,7 +146,7 @@ function run(rawInput) {
   return { exitCode: 0 };
 }
 
-module.exports = { run, shouldThrottle, buildPowerShellScript };
+module.exports = { run, shouldThrottle, buildPowerShellScript, isPulseDisabled };
 
 if (require.main === module) {
   process.stdin.setEncoding('utf8');

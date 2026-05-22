@@ -90,13 +90,31 @@ All optional. Set in your shell or `.env`:
 | :--- | :--- |
 | `CLAUDE_NOTIFY_DISABLED=1` | Disable the Notification + AskUserQuestion hook entirely |
 | `CLAUDE_NOTIFY_TTS_DISABLED=1` | Disable just TTS for Notification (edge-pulse still fires) |
+| `CLAUDE_NOTIFY_PULSE_DISABLED=1` | Disable just the edge-pulse for Notification + Bash (TTS still fires). Shared with bash-permission-alert |
 | `CLAUDE_NOTIFY_TTS_TEXT="..."` | Override the spoken phrase (skips keyword mapping) |
 | `CLAUDE_STOP_NOTIFY_DISABLED=1` | Disable the Stop hook entirely |
 | `CLAUDE_STOP_TTS_DISABLED=1` | Disable just TTS for Stop |
+| `CLAUDE_STOP_PULSE_DISABLED=1` | Disable just the edge-pulse for Stop (TTS still fires) |
 | `CLAUDE_STOP_TTS_TEXT="..."` | Override the Stop spoken phrase (default: *"Claude is done"*) |
 | `CLAUDE_NOTIFY_DUCK_DISABLED=1` | Skip pausing Spotify/YouTube/etc around TTS |
 | `CLAUDE_BASH_ALERT_DISABLED=1` | Disable just the Bash permission alert (other hooks still fire) |
 | `CLAUDE_NOTIFY_WAV_DISABLED=1` | Skip the pre-baked Supertonic WAVs and always use Windows SAPI |
+
+### Mute via slash-commands (v0.4.0+)
+
+Three slash-commands ship with the plugin so you can toggle mute scopes without editing env vars by hand:
+
+| Command | What it does |
+| :--- | :--- |
+| `/mute-tts [all\|voice\|visual]` | Sets the corresponding env keys to `"1"` in `~/.claude/settings.json` (defaults to `all`). Requires `Developer: Reload Window` to take effect. |
+| `/unmute-tts [all\|voice\|visual]` | Removes the corresponding env keys. `all` clears every TTS-related key. |
+| `/mute-tts-status` | Reports which mute scopes are currently active by inspecting `~/.claude/settings.json`. |
+
+Scope semantics:
+
+- **`all`** — flips `CLAUDE_NOTIFY_DISABLED`, `CLAUDE_STOP_NOTIFY_DISABLED`, `CLAUDE_BASH_ALERT_DISABLED`. Total silence.
+- **`voice`** — flips `CLAUDE_NOTIFY_TTS_DISABLED`, `CLAUDE_STOP_TTS_DISABLED`. Edge-pulse still fires; media-duck does not (it's tied to TTS).
+- **`visual`** — flips `CLAUDE_NOTIFY_PULSE_DISABLED`, `CLAUDE_STOP_PULSE_DISABLED`. TTS still fires.
 
 ## Bash permission alert (v0.2.0+)
 

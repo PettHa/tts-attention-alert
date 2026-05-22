@@ -1,6 +1,6 @@
 {
   "name": "tts-attention-alert",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Windows-only TTS + animated edge-pulse alerts that demand your attention when Claude pauses for input, asks a question, requests Bash permission, or finishes a response. Auto-ducks Spotify/YouTube around speech. Escalates color + replays TTS if you don't respond.",
   "author": {
     "name": "PettHa",
